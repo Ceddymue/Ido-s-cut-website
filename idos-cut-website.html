@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDO's CUT – Barbershop Offenbach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ─── PALETTE FROM SHOP PHOTO ─── */
+/* Wall: cool blue-gray                                   */
+/* Ceiling: deep charcoal #1e2125                         */
+/* Hex LEDs: pure white glow                              */
+/* Furniture: near-black #111416                          */
+/* Accent: kept minimal — white + gray tones only         */
+:root {
+  --ceiling:   #1e2125;   /* dark charcoal — shop ceiling / deepest bg */
+  --wall:      #8a9aaa;   /* the shop's blue-gray wall color */
+  --wall-dark: #2d3740;   /* darker wall tone for panels */
+  --wall-mid:  #4a5a68;   /* mid wall for borders/cards */
+  --surface:   #252b31;   /* card surfaces */
+  --furniture: #111416;   /* black chairs/counter */
+  --hex-white: #ffffff;   /* LED hex glow — pure white */
+  --hex-glow:  rgba(255,255,255,0.9); /* bright hex edge */
+  --text:      #e8edf2;   /* light, close to wall color */
+  --muted:     #6a7d8c;
+  --border:    #2e3840;
+  --accent:    #a8bcc8;   /* lighter wall tone as accent */
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--ceiling);
+  color: var(--text);
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--ceiling); }
+::-webkit-scrollbar-thumb { background: var(--wall-mid); }
+
+/* ═══ NAV ═══ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 56px;
+  background: rgba(30,33,37,0.93);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(138,154,170,0.15);
+  transition: padding 0.3s;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 0.18em;
+  color: var(--text); text-decoration: none;
+}
+.nav-logo .cut { color: var(--wall); }
+.nav-links { display: flex; gap: 40px; list-style: none; align-items: center; }
+.nav-links a {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-book {
+  background: var(--text) !important; color: var(--ceiling) !important;
+  padding: 9px 22px !important; border-radius: 1px; font-weight: 600 !important;
+  transition: background 0.2s !important;
+}
+.nav-book:hover { background: var(--wall) !important; color: var(--ceiling) !important; }
+.nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
+.nav-toggle span { display: block; width: 26px; height: 1.5px; background: var(--text); }
+
+/* ═══ BUTTONS ═══ */
+.btn-primary {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  background: var(--text); color: var(--ceiling);
+  border: none; padding: 16px 36px; cursor: pointer; border-radius: 1px;
+  text-decoration: none; display: inline-block;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: var(--wall); transform: translateY(-2px); }
+
+.btn-ghost {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase;
+  background: transparent; color: var(--text);
+  border: 1px solid rgba(232,237,242,0.25);
+  padding: 15px 36px; cursor: pointer; border-radius: 1px;
+  text-decoration: none; display: inline-block;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--text); }
+
+/* ═══ HERO ═══ */
+#hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex; align-items: center;
+  overflow: hidden;
+  background: var(--ceiling);
+}
+
+/* The hero SVG fills the entire background — this IS the shop ceiling */
+.hero-ceiling {
+  position: absolute;
+  inset: 0; z-index: 0;
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  padding: 140px 56px 100px;
+  max-width: 680px;
+}
+
+.eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 28px;
+  opacity: 0; animation: fadeUp 0.7s 0.2s ease both;
+}
+.eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--accent); }
+
+h1.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(80px, 11vw, 156px);
+  letter-spacing: 0.03em; line-height: 0.9;
+  color: var(--text); margin-bottom: 36px;
+  opacity: 0; animation: fadeUp 0.7s 0.35s ease both;
+}
+h1.hero-title .acc { color: var(--wall); }
+
+.hero-tagline {
+  font-size: 16px; font-weight: 300; color: var(--muted);
+  line-height: 1.8; max-width: 400px; margin-bottom: 52px;
+  opacity: 0; animation: fadeUp 0.7s 0.5s ease both;
+}
+.hero-cta {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp 0.7s 0.65s ease both;
+}
+
+.hero-badge {
+  position: absolute; bottom: 52px; right: 56px; z-index: 3;
+  text-align: right;
+  opacity: 0; animation: fadeIn 0.8s 1.1s ease both;
+}
+.badge-stars { color: var(--accent); font-size: 14px; letter-spacing: 4px; margin-bottom: 4px; }
+.badge-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 56px;
+  letter-spacing: 0.04em; color: var(--text); line-height: 1;
+}
+.badge-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; margin-top: 2px; }
+
+.scroll-hint {
+  position: absolute; bottom: 48px; left: 56px;
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted); opacity: 0; animation: fadeIn 1s 1.4s ease both; z-index: 3;
+}
+.scroll-bar { width: 1px; height: 44px; background: linear-gradient(to bottom, var(--accent), transparent); animation: pulse 2.2s infinite; }
+
+/* ═══ SECTION BASE ═══ */
+section { padding: 110px 56px; position: relative; overflow: hidden; }
+
+.section-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--accent); display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.section-tag::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+
+h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 5vw, 68px);
+  letter-spacing: 0.05em; line-height: 0.96; color: var(--text); margin-bottom: 16px;
+}
+h2 .acc { color: var(--wall); }
+
+.section-lead {
+  font-size: 15px; font-weight: 300; color: var(--muted); line-height: 1.8;
+  max-width: 500px; margin-bottom: 60px;
+}
+.wall-line { width: 44px; height: 1px; background: var(--wall-mid); margin-bottom: 40px; opacity: 0.6; }
+
+/* ═══ SERVICES ═══ */
+#services { background: var(--wall-dark); }
+
+.services-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.service-card {
+  background: var(--wall-dark); padding: 36px 28px;
+  position: relative; overflow: hidden; transition: background 0.3s, border-color 0.3s;
+  border: 2px solid var(--wall-mid);
+}
+.service-card:hover { border-color: var(--wall); }
+.service-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--wall), transparent);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+}
+.service-card:hover { background: #333f4a; }
+.service-card:hover::after { transform: scaleX(1); }
+
+/* Faint hex watermark in each service card */
+.service-card::before {
+  content: '';
+  position: absolute; top: -10px; right: -10px; width: 100px; height: 115px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='115'%3E%3Cpolygon points='50,4 96,29 96,86 50,111 4,86 4,29' fill='none' stroke='%238a9aaa' stroke-width='1'/%3E%3C/svg%3E");
+  opacity: 0.07; pointer-events: none;
+}
+
+.svc-num {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.2em;
+  color: var(--muted); margin-bottom: 18px; display: block;
+}
+.svc-icon { font-size: 24px; margin-bottom: 14px; display: block; }
+.svc-name {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin-bottom: 10px;
+}
+.svc-desc { font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+.svc-price {
+  font-family: 'Bebas Neue', sans-serif; font-size: 32px;
+  color: var(--accent); letter-spacing: 0.04em;
+}
+.svc-duration { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+/* ═══ BOOKING ═══ */
+#booking { background: var(--ceiling); }
+
+.booking-layout { display: grid; grid-template-columns: 1fr 1.8fr; gap: 72px; align-items: start; }
+.booking-perks { list-style: none; margin-top: 40px; display: flex; flex-direction: column; gap: 18px; }
+.booking-perks li {
+  display: flex; align-items: flex-start; gap: 14px;
+  font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.6;
+}
+.perk-hex {
+  width: 8px; height: 8px; background: var(--wall);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  flex-shrink: 0; margin-top: 5px;
+}
+
+.booking-box { background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+
+.booking-overlay {
+  width: 100%; height: 680px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 22px; padding: 40px; cursor: pointer; position: relative;
+  background: var(--surface); transition: background 0.3s; overflow: hidden;
+}
+.booking-overlay:hover { background: #2e363e; }
+
+/* Hex grid in overlay bg */
+.booking-overlay::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='115'%3E%3Cpolygon points='50,3 96,28 96,87 50,112 4,87 4,28' fill='none' stroke='%238a9aaa' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-size: 100px 115px; opacity: 0.06; pointer-events: none;
+}
+/* White glow center */
+.booking-overlay::before {
+  content: ''; position: absolute;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+
+.overlay-icon { position: relative; z-index: 1; width: 64px; height: 64px; }
+.overlay-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 38px;
+  letter-spacing: 0.08em; color: var(--text); text-align: center; position: relative; z-index: 1;
+}
+.overlay-sub {
+  font-size: 14px; font-weight: 300; color: var(--muted);
+  text-align: center; max-width: 300px; line-height: 1.7; position: relative; z-index: 1;
+}
+.overlay-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  background: var(--text); color: var(--ceiling);
+  border: none; padding: 16px 40px; cursor: pointer; border-radius: 1px;
+  transition: background 0.2s, transform 0.15s; position: relative; z-index: 1;
+}
+.overlay-btn:hover { background: var(--wall); transform: translateY(-2px); }
+.overlay-note {
+  font-size: 10px; color: var(--muted); text-align: center;
+  max-width: 280px; line-height: 1.6; opacity: 0.5; position: relative; z-index: 1;
+}
+.booking-box iframe { width: 100%; height: 680px; border: none; display: block; }
+
+/* ═══ TEAM ═══ */
+#team { background: var(--wall-dark); }
+
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.team-card {
+  background: var(--surface); border: 1px solid var(--border); overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.team-card:hover { border-color: var(--wall-mid); transform: translateY(-6px); }
+
+.team-photo {
+  height: 240px; position: relative; overflow: hidden;
+  background: var(--ceiling); display: flex; align-items: center; justify-content: center;
+}
+/* Hex pattern + overhead glow — like the shop's LED ceiling above barber chairs */
+.team-photo::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='80'%3E%3Cpolygon points='35,3 67,21 67,59 35,77 3,59 3,21' fill='none' stroke='%238a9aaa' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-size: 70px 80px; opacity: 0.1;
+}
+.team-photo::after {
+  content: ''; position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  width: 220px; height: 180px;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.07) 0%, transparent 65%);
+}
+.team-initials {
+  font-family: 'Bebas Neue', sans-serif; font-size: 60px; letter-spacing: 0.08em;
+  color: var(--wall); opacity: 0.3; position: relative; z-index: 1;
+}
+.team-info { padding: 24px 26px 30px; }
+.team-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.08em; color: var(--text); margin-bottom: 4px; }
+.team-role {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+}
+.team-bio { font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.7; }
+
+/* ═══ GALLERY ═══ */
+#gallery { background: var(--ceiling); padding-bottom: 0; }
+
+.gallery-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 260px 260px; gap: 3px; margin-top: 56px;
+}
+.gallery-item:first-child { grid-row: 1 / 3; }
+.gallery-item { background: var(--surface); overflow: hidden; cursor: pointer; }
+
+.gallery-thumb {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 10px; position: relative; overflow: hidden;
+  background: var(--surface); transition: transform 0.5s ease;
+}
+.gallery-thumb::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='69'%3E%3Cpolygon points='30,2 58,17 58,52 30,67 2,52 2,17' fill='none' stroke='%238a9aaa' stroke-width='0.7'/%3E%3C/svg%3E");
+  background-size: 60px 69px; opacity: 0.07;
+}
+.gallery-thumb::after {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 70%; height: 50%;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,0.04), transparent 70%);
+}
+.gallery-item:hover .gallery-thumb { transform: scale(1.04); }
+.gal-icon { font-size: 24px; opacity: 0.2; position: relative; z-index: 1; }
+.gal-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted); opacity: 0.35; position: relative; z-index: 1;
+}
+
+/* ═══ REVIEWS ═══ */
+#reviews-section { background: var(--wall-dark); }
+
+.reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+.review-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-top: 2px solid var(--wall-mid); padding: 30px 26px; transition: border-color 0.3s;
+}
+.review-card:hover { border-color: var(--wall-mid); border-top-color: var(--wall); }
+.review-stars { color: var(--accent); font-size: 12px; letter-spacing: 4px; margin-bottom: 16px; }
+.review-text { font-size: 15px; font-weight: 300; font-style: italic; color: rgba(232,237,242,0.82); line-height: 1.7; margin-bottom: 22px; }
+.review-author {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+
+/* ═══ CONTACT ═══ */
+#contact { background: var(--ceiling); }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+.contact-blocks { display: flex; flex-direction: column; gap: 40px; margin-top: 40px; }
+.contact-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+}
+.contact-val { font-size: 16px; font-weight: 300; color: var(--text); line-height: 1.65; }
+.contact-val a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.contact-val a:hover { color: var(--wall); }
+
+.hours-table { width: 100%; border-collapse: collapse; }
+.hours-table tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+.hours-table td { font-size: 14px; font-weight: 300; color: var(--muted); padding: 8px 0; }
+.hours-table tr.today td { color: var(--text); }
+.hours-table .closed-day td { opacity: 0.3; }
+.hours-table td:last-child { text-align: right; }
+
+.map-wrap { height: 380px; overflow: hidden; border: 1px solid var(--border); margin-top: 16px; }
+.map-wrap iframe { width: 100%; height: 100%; border: none; filter: grayscale(1) contrast(1.1) brightness(0.6); }
+.cta-bottom { margin-top: 24px; text-align: center; }
+
+/* ═══ FOOTER ═══ */
+footer {
+  background: #161a1d; border-top: 1px solid var(--border);
+  padding: 40px 56px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+}
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.16em; color: var(--text); }
+.footer-logo .cut { color: var(--wall); }
+.footer-copy { font-size: 12px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text); }
+
+/* ═══ UTILS ═══ */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes hexGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.6)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(255,255,255,0.95)); }
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1100px) {
+  section { padding: 80px 36px; }
+  nav { padding: 18px 36px; }
+  .booking-layout { grid-template-columns: 1fr; gap: 48px; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .team-grid { grid-template-columns: 1fr 1fr; }
+  .contact-grid { grid-template-columns: 1fr; gap: 48px; }
+  footer { padding: 36px; }
+  .hero-content { padding: 130px 36px 100px; }
+}
+@media (max-width: 720px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  section { padding: 64px 20px; }
+  .hero-content { padding: 100px 20px 80px; max-width: 100%; }
+  h1.hero-title { font-size: 72px; }
+  h2 { font-size: 40px; }
+  .hero-tagline { font-size: 14px; margin-bottom: 36px; }
+  .hero-cta { flex-direction: column; align-items: stretch; }
+  .btn-primary, .btn-ghost { text-align: center; padding: 15px 24px; }
+  .hero-badge { display: none; }
+  .scroll-hint { display: none; }
+  .services-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .service-card { padding: 22px 16px; }
+  .svc-name { font-size: 16px; }
+  .svc-desc { font-size: 12px; margin-bottom: 14px; }
+  .svc-price { font-size: 26px; }
+  .booking-layout { gap: 32px; }
+  .booking-overlay { height: 400px; padding: 28px 20px; gap: 18px; }
+  .overlay-title { font-size: 30px; }
+  .booking-box iframe { height: 580px !important; }
+  .team-grid { grid-template-columns: 1fr; }
+  .team-photo { height: 200px; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 150px 150px 150px; }
+  .gallery-item:first-child { grid-row: auto; grid-column: auto; }
+  .gallery-item { height: 150px; }
+  .reviews-grid { grid-template-columns: 1fr; }
+  .contact-grid { gap: 40px; }
+  .map-wrap { height: 240px; }
+  footer { flex-direction: column; text-align: center; padding: 32px 20px; }
+  .footer-links { flex-wrap: wrap; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">IDO'S <span class="cut">CUT</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#booking">Termin</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#gallery">Galerie</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+    <li><a href="#booking" class="nav-book">Jetzt buchen</a></li>
+  </ul>
+  <button class="nav-toggle" onclick="toggleNav()" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+
+  <!-- THE CEILING — large glowing hexagons exactly like the shop, viewed from below -->
+  <svg class="hero-ceiling" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+
+    <!-- Ceiling base gradient: dark charcoal at top (ceiling), slight lighter at bottom (wall meets) -->
+    <defs>
+      <linearGradient id="ceilGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#111315"/>
+        <stop offset="60%"  stop-color="#1e2125"/>
+        <stop offset="100%" stop-color="#252b31"/>
+      </linearGradient>
+
+      <!-- Glow filter for LED edges -->
+      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="12" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="bigglow" x="-80%" y="-80%" width="360%" height="360%">
+        <feGaussianBlur stdDeviation="28" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <!-- Radial fade: brighter in the cluster, fades toward edges -->
+      <radialGradient id="clusterFade" cx="62%" cy="30%" r="55%">
+        <stop offset="0%"  stop-color="white" stop-opacity="1"/>
+        <stop offset="60%" stop-color="white" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="clusterMask">
+        <rect width="1440" height="900" fill="url(#clusterFade)"/>
+      </mask>
+    </defs>
+
+    <!-- Background -->
+    <rect width="1440" height="900" fill="url(#ceilGrad)"/>
+
+    <!-- ── LARGE HEX CLUSTER (right side, like the shop) ── -->
+    <!-- Hex size: ~200px wide (flat-top). Center cluster: cx~900 cy~220 -->
+    <!-- Row 1: 3 hexes across top -->
+    <!-- Hex geometry: flat-top hexagon with width W, height W*1.1547 -->
+    <!-- W=210, H=242. Horizontal spacing: W*0.75=157.5, Vertical: H/2=121 -->
+
+    <!-- BIG GLOW BLOOM behind the whole cluster -->
+    <ellipse cx="900" cy="280" rx="420" ry="280" fill="rgba(255,255,255,0.04)" filter="url(#bigglow)"/>
+    <ellipse cx="900" cy="180" rx="280" ry="160" fill="rgba(255,255,255,0.05)" filter="url(#bigglow)"/>
+
+    <!-- ── ROW 0 (partial, top edge, mostly off-screen) ── -->
+    <!-- These are the tops of hexes that continue off the top -->
+    <polygon points="720,-20 825,41 825,163 720,224 615,163 615,41"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="877,-20 982,41 982,163 877,224 772,163 772,41"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="1034,-20 1139,41 1139,163 1034,224 929,163 929,41"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.65)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="1191,-20 1296,41 1296,163 1191,224 1086,163 1086,41"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#glow)"/>
+
+    <!-- ── ROW 1 ── (main visible row) -->
+    <polygon points="720,100 825,161 825,283 720,344 615,283 615,161"
+             fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.85)" stroke-width="3" filter="url(#glow)"/>
+    <polygon points="877,100 982,161 982,283 877,344 772,283 772,161"
+             fill="rgba(255,255,255,0.03)" stroke="white" stroke-width="3.5" filter="url(#glow)"/>
+    <polygon points="1034,100 1139,161 1139,283 1034,344 929,283 929,161"
+             fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.8)" stroke-width="3" filter="url(#glow)"/>
+    <polygon points="1191,100 1296,161 1296,283 1191,344 1086,283 1086,161"
+             fill="rgba(255,255,255,0.018)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="563,100 668,161 668,283 563,344 458,283 458,161"
+             fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.45)" stroke-width="2" filter="url(#glow)"/>
+
+    <!-- ── ROW 2 (offset) ── -->
+    <polygon points="798,222 903,283 903,405 798,466 693,405 693,283"
+             fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.8)" stroke-width="3" filter="url(#glow)"/>
+    <polygon points="955,222 1060,283 1060,405 955,466 850,405 850,283"
+             fill="rgba(255,255,255,0.03)" stroke="white" stroke-width="3.5" filter="url(#glow)"/>
+    <polygon points="1112,222 1217,283 1217,405 1112,466 1007,405 1007,283"
+             fill="rgba(255,255,255,0.022)" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="1269,222 1374,283 1374,405 1269,466 1164,405 1164,283"
+             fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#glow)"/>
+    <polygon points="641,222 746,283 746,405 641,466 536,405 536,283"
+             fill="rgba(255,255,255,0.012)" stroke="rgba(255,255,255,0.35)" stroke-width="2" filter="url(#glow)"/>
+
+    <!-- ── ROW 3 (same x as row 1, further down) ── -->
+    <polygon points="720,344 825,405 825,527 720,588 615,527 615,405"
+             fill="rgba(255,255,255,0.018)" stroke="rgba(255,255,255,0.55)" stroke-width="2" filter="url(#glow)"/>
+    <polygon points="877,344 982,405 982,527 877,588 772,527 772,405"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.65)" stroke-width="2.5" filter="url(#glow)"/>
+    <polygon points="1034,344 1139,405 1139,527 1034,588 929,527 929,405"
+             fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#glow)"/>
+    <polygon points="1191,344 1296,405 1296,527 1191,588 1086,527 1086,405"
+             fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+    <polygon points="563,344 668,405 668,527 563,588 458,527 458,405"
+             fill="rgba(255,255,255,0.008)" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+
+    <!-- ── Soft white inner fills on the 2 brightest hexes (LED glow effect) ── -->
+    <polygon points="877,100 982,161 982,283 877,344 772,283 772,161" fill="rgba(255,255,255,0.06)" filter="url(#softglow)"/>
+    <polygon points="955,222 1060,283 1060,405 955,466 850,405 850,283" fill="rgba(255,255,255,0.06)" filter="url(#softglow)"/>
+
+    <!-- ── WALL HEX CLUSTER (center-right, like the shop's wall decoration) ── -->
+    <!-- 3 vertically stacked hexes on the wall area, smaller: ~120px wide -->
+    <polygon points="1300,420 1369,460 1369,540 1300,580 1231,540 1231,460"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.7)" stroke-width="2" filter="url(#glow)"/>
+    <polygon points="1300,538 1369,578 1369,658 1300,698 1231,658 1231,578"
+             fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.65)" stroke-width="2" filter="url(#glow)"/>
+    <polygon points="1300,656 1369,696 1369,776 1300,816 1231,776 1231,696"
+             fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" filter="url(#glow)"/>
+    <!-- Glow on wall hexes -->
+    <polygon points="1300,538 1369,578 1369,658 1300,698 1231,658 1231,578" fill="rgba(255,255,255,0.04)" filter="url(#softglow)"/>
+
+    <!-- ── Light spill downward from ceiling onto the "floor" area ── -->
+    <ellipse cx="950" cy="750" rx="380" ry="80" fill="rgba(255,255,255,0.015)" filter="url(#softglow)"/>
+    <ellipse cx="1300" cy="800" rx="100" ry="40" fill="rgba(255,255,255,0.02)" filter="url(#softglow)"/>
+
+    <!-- ── Perspective fade: everything below center fades to the wall color ── -->
+    <defs>
+      <linearGradient id="wallFade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#1e2125" stop-opacity="0"/>
+        <stop offset="55%"  stop-color="#1e2125" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#2d3740" stop-opacity="0.85"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#wallFade)"/>
+
+    <!-- Left side darkening (so text is readable) -->
+    <defs>
+      <linearGradient id="leftDark" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#1e2125" stop-opacity="0.96"/>
+        <stop offset="45%"  stop-color="#1e2125" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#1e2125" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#leftDark)"/>
+  </svg>
+
+  <!-- Text content -->
+  <div class="hero-content">
+    <div class="eyebrow">Barbershop · Offenbach am Main</div>
+    <h1 class="hero-title">IDO'S<br><span class="acc">CUT</span></h1>
+    <p class="hero-tagline">Mehr als ein Haarschnitt — ein Erlebnis. Professionelle Barbershop-Kunst im modernen Studio in Offenbach.</p>
+    <div class="hero-cta">
+      <a href="#booking" class="btn-primary">Jetzt Termin buchen</a>
+      <a href="#services" class="btn-ghost">Unsere Services</a>
+    </div>
+  </div>
+
+  <div class="hero-badge">
+    <div class="badge-stars">★★★★★</div>
+    <div class="badge-num">4.9</div>
+    <div class="badge-sub">98 Google-Bewertungen</div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-bar"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services">
+  <!-- Faint hex bg right side -->
+  <svg style="position:absolute;right:0;top:0;width:45%;height:100%;opacity:0.04;pointer-events:none" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+    <defs><pattern id="svcHex" x="0" y="0" width="100" height="115" patternUnits="userSpaceOnUse">
+      <polygon points="50,3 96,28 96,87 50,112 4,87 4,28" fill="none" stroke="#8a9aaa" stroke-width="1"/>
+    </pattern></defs>
+    <rect width="600" height="800" fill="url(#svcHex)"/>
+  </svg>
+
+  <div class="section-tag">Leistungen</div>
+  <h2>UNSERE <span class="acc">SERVICES</span></h2>
+  <p class="section-lead">Präzision trifft Stil. Von klassischen Schnitten bis zu modernem Bart-Styling — alles aus einer Hand.</p>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <span class="svc-num">— 01</span>
+      <span class="svc-icon">✂️</span>
+      <div class="svc-name">Haarschnitt</div>
+      <p class="svc-desc">Klassischer oder moderner Schnitt, präzise ausgeführt und auf dich abgestimmt.</p>
+      <div class="svc-price">AB 20€</div>
+      <div class="svc-duration">⏱ 30 Minuten</div>
+    </div>
+    <div class="service-card">
+      <span class="svc-num">— 02</span>
+      <span class="svc-icon">🪒</span>
+      <div class="svc-name">Bart-Styling</div>
+      <p class="svc-desc">Professionelles Trimmen, Rasieren und Formen für den gepflegten Look.</p>
+      <div class="svc-price">AB 15€</div>
+      <div class="svc-duration">⏱ 20 Minuten</div>
+    </div>
+    <div class="service-card">
+      <span class="svc-num">— 03</span>
+      <span class="svc-icon">💈</span>
+      <div class="svc-name">Komplett-Paket</div>
+      <p class="svc-desc">Haarschnitt + Bart-Styling kombiniert — das komplette Rundum-Erlebnis.</p>
+      <div class="svc-price">AB 30€</div>
+      <div class="svc-duration">⏱ 50 Minuten</div>
+    </div>
+    <div class="service-card">
+      <span class="svc-num">— 04</span>
+      <span class="svc-icon">🧴</span>
+      <div class="svc-name">Kopfwäsche</div>
+      <p class="svc-desc">Tiefenreinigung mit hochwertigen Produkten für Kopfhaut und Haar.</p>
+      <div class="svc-price">AB 10€</div>
+      <div class="svc-duration">⏱ 15 Minuten</div>
+    </div>
+    <div class="service-card">
+      <span class="svc-num">— 05</span>
+      <span class="svc-icon">👦</span>
+      <div class="svc-name">Kinder-Schnitt</div>
+      <p class="svc-desc">Geduldige Betreuung für die Kleinen — entspannt und spielerisch.</p>
+      <div class="svc-price">AB 15€</div>
+      <div class="svc-duration">⏱ 25 Minuten</div>
+    </div>
+    <div class="service-card">
+      <span class="svc-num">— 06</span>
+      <span class="svc-icon">⭐</span>
+      <div class="svc-name">Premium Styling</div>
+      <p class="svc-desc">Individuelles Finish mit Produktberatung für besondere Anlässe.</p>
+      <div class="svc-price">AB 40€</div>
+      <div class="svc-duration">⏱ 60 Minuten</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BOOKING ═══ -->
+<section id="booking">
+  <div class="booking-layout">
+    <div>
+      <div class="section-tag">Online buchen</div>
+      <h2>DEIN TERMIN,<br><span class="acc">DEINE ZEIT.</span></h2>
+      <div class="wall-line"></div>
+      <p style="font-size:15px;font-weight:300;color:var(--muted);line-height:1.8;">Wähle deinen Barbier, die Leistung und den Zeitslot — direkt online, rund um die Uhr.</p>
+      <ul class="booking-perks">
+        <li><span class="perk-hex"></span>Wähle deinen Lieblings-Barbier</li>
+        <li><span class="perk-hex"></span>Termine Mo–Sa, 10 bis 20 Uhr</li>
+        <li><span class="perk-hex"></span>Sofortige Bestätigung per E-Mail</li>
+        <li><span class="perk-hex"></span>Kostenlose Stornierung bis 24h vorher</li>
+        <li><span class="perk-hex"></span>SMS- und E-Mail-Erinnerung</li>
+      </ul>
+    </div>
+    <div class="booking-box reveal">
+      <iframe
+        src="https://idoscuti49v.setmore.com/book"
+        title="IDO's CUT – Terminbuchung"
+        loading="lazy"
+        allow="payment"
+        style="width:100%; height:680px; border:none; display:block;">
+      </iframe>
+      <p style="font-size:10px; color:var(--muted); text-align:center; padding:10px; opacity:0.45; border-top:1px solid var(--border);">
+        Terminbuchung bereitgestellt von Setmore · Durch die Nutzung gelten die <a href="https://www.setmore.com/privacy" target="_blank" style="color:var(--muted);">Datenschutzbestimmungen von Setmore</a>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TEAM ═══ -->
+<section id="team">
+  <div class="section-tag">Das Team</div>
+  <h2>MEISTER IHRES <span class="acc">FACHS</span></h2>
+  <p class="section-lead">Leidenschaft, Präzision und Erfahrung — unser Team bringt deine Vision zum Leben.</p>
+  <div class="team-grid reveal">
+    <div class="team-card">
+      <div class="team-photo"><div class="team-initials">IDO</div></div>
+      <div class="team-info">
+        <div class="team-name">IDO</div>
+        <div class="team-role">Master Barber · Inhaber</div>
+        <p class="team-bio">Gründer und Gesicht von IDO's CUT. Jahrelange Erfahrung und ein untrügliches Gespür für den perfekten Schnitt.</p>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-photo"><div class="team-initials">B2</div></div>
+      <div class="team-info">
+        <div class="team-name">Dein Barbier</div>
+        <div class="team-role">Senior Barber</div>
+        <p class="team-bio">Spezialist für moderne Fade-Techniken und klassische Nassrasur. Präzision ist seine Stärke.</p>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-photo"><div class="team-initials">B3</div></div>
+      <div class="team-info">
+        <div class="team-name">Dein Barbier</div>
+        <div class="team-role">Barber</div>
+        <p class="team-bio">Kreative Styles und maßgeschneiderte Looks — er bringt deine Vision zum Leben.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GALLERY ═══ -->
+<section id="gallery">
+  <div class="section-tag">Galerie</div>
+  <h2>UNSERE <span class="acc">ARBEIT</span></h2>
+  <p class="section-lead">Bilder sagen mehr als Worte — lass die Ergebnisse für sich sprechen.</p>
+  <div class="gallery-grid reveal">
+    <div class="gallery-item"><div class="gallery-thumb"><div class="gal-icon">📷</div><div class="gal-label">Foto hochladen</div></div></div>
+    <div class="gallery-item"><div class="gallery-thumb"><div class="gal-icon">📷</div><div class="gal-label">Foto hochladen</div></div></div>
+    <div class="gallery-item"><div class="gallery-thumb"><div class="gal-icon">📷</div><div class="gal-label">Foto hochladen</div></div></div>
+    <div class="gallery-item"><div class="gallery-thumb"><div class="gal-icon">📷</div><div class="gal-label">Foto hochladen</div></div></div>
+    <div class="gallery-item"><div class="gallery-thumb"><div class="gal-icon">📷</div><div class="gal-label">Foto hochladen</div></div></div>
+  </div>
+</section>
+
+<!-- ═══ REVIEWS ═══ -->
+<section id="reviews-section">
+  <div class="section-tag">Bewertungen</div>
+  <h2>WAS KUNDEN <span class="acc">SAGEN</span></h2>
+  <div class="reviews-grid reveal">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Sehr nett, höflich und kompetent. Der Service war angenehm und professionell. Ich kann es auf jeden Fall weiterempfehlen."</p>
+      <div class="review-author">— Montazeri · Google</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Gibt keinen besseren in Offenbach und Umgebung. Absolut top!"</p>
+      <div class="review-author">— David Meng · Google</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Einer der besten Friseure die ich kenne. Sehr sympathisch und freundlich. Sehr empfehlenswert."</p>
+      <div class="review-author">— Elijahu Gofman · Google</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="section-tag">Kontakt</div>
+      <h2>WIR SIND<br><span class="acc">FÜR DICH DA</span></h2>
+      <div class="contact-blocks reveal">
+        <div>
+          <div class="contact-label">Adresse</div>
+          <div class="contact-val">Feldstraße 12<br>63071 Offenbach am Main</div>
+        </div>
+        <div>
+          <div class="contact-label">Telefon</div>
+          <div class="contact-val"><a href="tel:+496930072217">069 30072217</a></div>
+        </div>
+        <div>
+          <div class="contact-label">Online buchen</div>
+          <div class="contact-val"><a href="https://idoscuti49v.setmore.com" target="_blank">idoscuti49v.setmore.com</a></div>
+        </div>
+        <div>
+          <div class="contact-label">Öffnungszeiten</div>
+          <table class="hours-table">
+            <tr class="closed-day"><td>Sonntag</td><td>Geschlossen</td></tr>
+            <tr><td>Montag</td><td>10:00 – 20:00</td></tr>
+            <tr><td>Dienstag</td><td>10:00 – 20:00</td></tr>
+            <tr><td>Mittwoch</td><td>10:00 – 20:00</td></tr>
+            <tr><td>Donnerstag</td><td>10:00 – 20:00</td></tr>
+            <tr><td>Freitag</td><td>10:00 – 20:00</td></tr>
+            <tr><td>Samstag</td><td>10:00 – 20:00</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="map-wrap reveal">
+        <iframe src="https://maps.google.com/maps?q=Feldstra%C3%9Fe+12,+63071+Offenbach+am+Main&output=embed" title="Standort" loading="lazy"></iframe>
+      </div>
+      <div class="cta-bottom">
+        <a href="#booking" class="btn-primary">Jetzt Termin buchen →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">IDO'S <span class="cut">CUT</span></div>
+  <div class="footer-copy">© 2025 IDO's CUT Barbershop · Offenbach am Main</div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="#booking">Termin</a>
+    <a href="#team">Team</a>
+    <a href="#contact">Kontakt</a>
+  </div>
+</footer>
+
+<script>
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  const isWide = window.innerWidth > 720;
+  nav.style.padding = window.scrollY > 60
+    ? (isWide ? '12px 56px' : '12px 20px')
+    : (isWide ? '20px 56px' : '16px 20px');
+});
+
+function toggleNav() {
+  const links = document.querySelector('.nav-links');
+  const open = links.style.display === 'flex';
+  links.style.display = open ? 'none' : 'flex';
+  if (!open) Object.assign(links.style, {
+    flexDirection:'column', position:'absolute',
+    top:'100%', left:'0', right:'0',
+    background:'rgba(22,26,29,0.98)',
+    padding:'24px 20px', gap:'20px',
+    borderBottom:'1px solid #2e3840'
+  });
+}
+document.querySelectorAll('.nav-links a').forEach(a =>
+  a.addEventListener('click', () => {
+    if (window.innerWidth < 720) document.querySelector('.nav-links').style.display = 'none';
+  })
+);
+
+const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+document.querySelectorAll('.hours-table tr').forEach(row => {
+  if (row.cells[0]?.textContent === days[new Date().getDay()]) row.classList.add('today');
+});
+</script>
+</body>
+</html>
